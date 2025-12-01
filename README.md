@@ -1,5 +1,7 @@
 # Crypto Trading Tracker
 
+**YOU ARE GOING TO NEED TO SETUP THE API WORKING YOURSELF lolz**
+
 Google Apps Script for tracking cryptocurrency trades across multiple coins in Google Sheets. I was too lazy to make a sheet manually but this probably took longer 🙌🏾
 
 ## Features
