@@ -1,15 +1,34 @@
 /**
  * Crypto Trading Tracker - Google Apps Script
- * Lol this is .gs just renamed to .js for compatibility
+ * 
+ * SETUP:
+ * Crypto Trading Tracker - Google Apps Script
+ * this is .gs just renamed to .js for compatibility
+ * holy too lazy to make a spreadsheet lol
  * 
  * SETUP:
  * To be honest go over the readme first, but here are quick steps:
  * 1. Open your Google Sheet
  * 2. Go to Extensions > Apps Script
  * 3. Delete any code in there and paste this entire script
- * 4. Save (Ctrl+S or Cmd+S)
- * 5. Use the custom menu: Crypto Tracker > Setup All Coins
- * 6. Grant permissions when asked
+ * 4. Add your CoinGecko API key below (see API Key Setup section)
+ * 5. Add your trades to COIN_TRADES object below
+ * 6. Save (Ctrl+S or Cmd+S)
+ * 7. Go back to your sheet and refresh the page
+ * 8. Use the custom menu: Crypto Tracker > Setup All Coins
+ * 9. Grant permissions when asked
+ * 10. Use menu: Crypto Tracker > Populate All Trades
+ * 
+ * API KEY SETUP:
+ * This script uses CoinGecko API to fetch live crypto prices in CAD.
+ * - Get a free API key at: https://www.coingecko.com/en/api/pricing
+ * - Free tier: 10,000 calls/month (more than enough for personal use)
+ * - Once you have your key, paste it below where it says 'YOUR_API_KEY_HERE'
+ * 
+ * ALTERNATIVE: If you don't want to use CoinGecko, you can:
+ * - Remove the getCoinPrice() function calls
+ * - Manually enter prices in the summary section
+ * - Or modify getCoinPrice() to use a different API (CoinCap, CryptoCompare, etc.)
  * 
  * TO ADD NEW COINS:
  * - Add trades to COIN_TRADES object below
@@ -17,12 +36,16 @@
  * 
  * TO ADD TRADES:
  * - Use menu: Crypto Tracker > Add New Trade (while on that coin's tab)
- * - Or add to COIN_TRADES below and run populateAllTrades
+ * - Or add to COIN_TRADES below and run Populate All Trades
  */
 
 // ============== CONFIGURATION ==============
 
+// CoinGecko API Key - Get yours at https://www.coingecko.com/en/api/pricing
+const COINGECKO_API_KEY = 'YOUR_API_KEY_HERE';
+
 // Add all your trades here organized by coin
+// Format: { date: 'YYYY-MM-DD', type: 'BUY' or 'SELL', quantity: number, price: price in CAD }
 const COIN_TRADES = {
   'SOL': [
     // Example: { date: '2025-11-14', type: 'BUY', quantity: 0.99, price: 201.55 },
@@ -35,6 +58,8 @@ const COIN_TRADES = {
   'ETH': [
     // Example: { date: '2025-12-01', type: 'BUY', quantity: 0.5, price: 4500 },
   ]
+  
+  // Add more coins as needed
 };
 
 // Map coin symbols to CoinGecko IDs (add more as needed)
@@ -241,11 +266,39 @@ function getCoinPrice(coinSymbol) {
     return 0;
   }
   
+  if (!COINGECKO_API_KEY || COINGECKO_API_KEY === 'YOUR_API_KEY_HERE') {
+    Logger.log('CoinGecko API key not configured');
+    return 0;
+  }
+  
   try {
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=cad`;
-    const response = UrlFetchApp.fetch(url);
+    // Using CoinGecko API with API key as query parameter
+    const url = `https://api.coingecko.com/api/v3/simple/price?vs_currencies=cad&ids=${coinId}&x_cg_demo_api_key=${COINGECKO_API_KEY}`;
+    const options = {
+      'method': 'get',
+      'muteHttpExceptions': true,
+      'headers': {
+        'Accept': 'application/json'
+      }
+    };
+    
+    const response = UrlFetchApp.fetch(url, options);
+    const statusCode = response.getResponseCode();
+    
+    if (statusCode !== 200) {
+      Logger.log(`CoinGecko API returned status ${statusCode} for ${coinSymbol}`);
+      Logger.log(`Response: ${response.getContentText()}`);
+      return 0;
+    }
+    
     const data = JSON.parse(response.getContentText());
-    return data[coinId].cad;
+    
+    if (data[coinId] && data[coinId].cad) {
+      return data[coinId].cad;
+    } else {
+      Logger.log(`No CAD price found for ${coinSymbol}`);
+      return 0;
+    }
   } catch (error) {
     Logger.log(`Error fetching ${coinSymbol} price: ` + error);
     return 0;
@@ -395,5 +448,39 @@ function onOpen() {
     .addSeparator()
     .addItem('Refresh Price (Current Sheet)', 'refreshCurrentPrice')
     .addItem('Refresh All Prices', 'refreshAllPrices')
+    .addSeparator()
+    .addItem('Test SOL Price', 'testSOLPrice')
     .addToUi();
+}
+
+// ============== TEST FUNCTION ==============
+
+function testSOLPrice() {  
+  if (!COINGECKO_API_KEY || COINGECKO_API_KEY === 'YOUR_API_KEY_HERE') {
+    return;
+  }
+  
+  try {
+    const url = `https://api.coingecko.com/api/v3/simple/price?vs_currencies=cad&ids=solana&x_cg_demo_api_key=${COINGECKO_API_KEY}`;
+    
+    Logger.log('Testing URL: ' + url);
+    
+    const response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
+    const statusCode = response.getResponseCode();
+    const responseText = response.getContentText();
+    
+    Logger.log('Status Code: ' + statusCode);
+    Logger.log('Response: ' + responseText);
+    
+    if (statusCode === 200) {
+      const data = JSON.parse(responseText);
+      const solPrice = data.solana.cad;
+      
+      Logger.log('SOL Price: $' + solPrice + ' CAD');
+    } else {
+      Logger.log(`API Error\nStatus: ${statusCode}\nResponse: ${responseText}`);
+    }
+  } catch (error) {
+    Logger.log('Error: ' + error);
+  }
 }

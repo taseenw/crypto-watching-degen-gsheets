@@ -1,28 +1,58 @@
 # Crypto Trading Tracker
-
-**YOU ARE GOING TO NEED TO SETUP THE API WORKING YOURSELF lolz**
-
 Google Apps Script for tracking cryptocurrency trades across multiple coins in Google Sheets. I was too lazy to make a sheet manually but this probably took longer 🙌🏾
 
 ## Features
 
-- Multi-coin support - separate tab for each cryptocurrency
-- Automatic calculations: running totals, average buy price, portfolio value
-- Live price fetching from CoinGecko API
-- CAD and USD tracking
-- Support for both BUY and SELL transactions
-- Interactive menu for adding trades
-- No API keys required
+- **Multi-coin support** - separate tab for each cryptocurrency
+- **Live price fetching** from CoinGecko API (CAD prices)
+- **Automatic calculations**: running totals, average buy price, portfolio value
+- **CAD and USD tracking** with automatic conversion
+- **Support for BUY and SELL transactions**
+- **Interactive menu** for adding trades
+- **Clean spreadsheet** with professional formatting
+
+## Requirements
+
+- Google Account (for Google Sheets)
+- CoinGecko API Key (free tier available)
+  - Sign up at: https://www.coingecko.com/en/api/pricing
+  - Free tier: 10,000 calls/month
+  - Provides real-time CAD prices for all major cryptocurrencies
 
 ## Setup
 
-1. Create a new Google Sheet
-2. Go to **Extensions > Apps Script**
-3. Delete any existing code
-4. Copy and paste the entire contents of `crypto-tracker.gs`
-5. Save the project
-6. Return to your Google Sheet and refresh the page
-7. A "Crypto Tracker" menu will appear in the menu bar
+1. **Get a CoinGecko API Key** (Optional but recommended for live prices)
+   - Go to https://www.coingecko.com/en/api/pricing
+   - Sign up for a free account
+   - Get your API key from the dashboard
+   - Free tier gives you 10,000 calls/month
+
+2. **Create a new Google Sheet**
+
+3. **Open Apps Script**
+   - Go to **Extensions > Apps Script**
+   - Delete any existing code
+
+4. **Add the script**
+   - Copy and paste the entire contents of `crypto-tracker.gs`
+
+5. **Configure your API key**
+   - Find this line near the top: `const COINGECKO_API_KEY = 'YOUR_API_KEY_HERE';`
+   - Replace `YOUR_API_KEY_HERE` with your actual API key
+
+6. **Add your trades**
+   - Find the `COIN_TRADES` object
+   - Add your trades following the format shown in the examples
+
+7. **Save the project** (Ctrl+S or Cmd+S)
+
+8. **Return to your Google Sheet and refresh** the page
+
+9. **Use the menu**
+   - A "Crypto Tracker" menu will appear in the menu bar
+   - Click: **Crypto Tracker > Setup All Coins**
+   - Grant permissions when prompted
+   - Click: **Crypto Tracker > Populate All Trades**
 
 ## Usage
 
@@ -129,11 +159,15 @@ Find CoinGecko IDs at: https://www.coingecko.com/
 
 ## Notes
 
-- Uses CoinGecko's free API (no rate limits for occasional use)
-- Portfolio values auto-update with live price
+- **API Key**: Requires CoinGecko API key for live prices (free tier: 10,000 calls/month)
+  - Get yours at: https://www.coingecko.com/en/api/pricing
+  - Alternative: Manually update prices in the summary section
+  - Alternative: Modify `getCoinPrice()` to use a different API (CoinCap, CryptoCompare, etc.)
+- Portfolio values auto-update with live price from CoinGecko
 - All calculations handle both buys and sells
 - Timestamps track last update time
 - Number formatting applied automatically
+- CAD prices fetched directly from CoinGecko (no USD conversion needed)
 
 ## License
 
