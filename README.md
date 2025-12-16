@@ -1,5 +1,5 @@
 # Crypto Trading Tracker
-Google Apps Script for tracking cryptocurrency trades across multiple coins in Google Sheets. I was too lazy to make a sheet manually but this probably took longer 🙌🏾
+Google Apps Script for tracking cryptocurrency trades across multiple coins in Google Sheets. I was too lazy to make a sheet manually but this probably took longer 🙌🏾<br>
 I used this for a video, so there is a duplicate esque in CS-Lightwork repo but this was the first iteration
 ## Features
 
